@@ -263,6 +263,9 @@ ServiceFabricBackup/
 *.ldf
 *.ndf
 
+# SQLite test database
+hostelapp_integration_test.db
+
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout

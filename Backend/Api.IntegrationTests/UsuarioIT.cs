@@ -70,7 +70,7 @@ namespace Api.IntegrationTests
             
             var response2 = await RegistrarUnUsuario();
 
-            response2.StatusCode.Should().Be((int)HttpStatusCode.InternalServerError);
+            response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
             var error = await response2.Content.ReadAsStringAsync();
             error.Should().Contain("Ya existe un usuario");
         }
@@ -80,7 +80,7 @@ namespace Api.IntegrationTests
         {
             var response = await AccederSinTokenAUnMetodoAutenticado();
 
-            response.StatusCode.Should().Be((int)HttpStatusCode.Unauthorized);
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
 
         private async Task DadoQueHayUnUsuarioRegistrado()

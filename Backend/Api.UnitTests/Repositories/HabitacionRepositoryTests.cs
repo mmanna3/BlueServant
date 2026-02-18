@@ -83,7 +83,10 @@ namespace Api.UnitTests.Repositories
 
 		private async Task DadoQueSeReservaLaHabitacionPrivada(int habitacionId, DateTime primeraNoche, DateTime ultimaNoche)
 		{
-			var reserva = new Reserva { PrimeraNoche = primeraNoche, UltimaNoche = ultimaNoche, Estado = ReservaEstadoEnum.CheckinPendiente };
+			var pasajero = new Pasajero { NombreCompleto = "Test", DniOPasaporte = "123", Email = "test@test.com", Telefono = "123", Pais = "AR" };
+			_context.Pasajeros.Add(pasajero);
+
+			var reserva = new Reserva { PrimeraNoche = primeraNoche, UltimaNoche = ultimaNoche, Estado = ReservaEstadoEnum.CheckinPendiente, PasajeroTitular = pasajero, Canal = "Test", HoraEstimadaDeLlegada = TimeSpan.Zero, CantidadDePasajeros = 1 };
 			var reservasHabitacionesPrivadas = new ReservaHabitacionPrivada { Reserva = reserva, HabitacionPrivadaId = habitacionId };
 			reserva.ReservaHabitacionesPrivadas = new List<ReservaHabitacionPrivada> { reservasHabitacionesPrivadas };
 			await _context.Reservas.AddAsync(reserva);
@@ -231,7 +234,10 @@ namespace Api.UnitTests.Repositories
 
 		private async Task Reservar(Cama cama, DateTime primeraNoche, DateTime ultimaNoche)
 		{
-			var reserva = new Reserva { PrimeraNoche = primeraNoche, UltimaNoche = ultimaNoche, Estado = ReservaEstadoEnum.CheckinPendiente };
+			var pasajero = new Pasajero { NombreCompleto = "Test", DniOPasaporte = "123", Email = "test@test.com", Telefono = "123", Pais = "AR" };
+			_context.Pasajeros.Add(pasajero);
+
+			var reserva = new Reserva { PrimeraNoche = primeraNoche, UltimaNoche = ultimaNoche, Estado = ReservaEstadoEnum.CheckinPendiente, PasajeroTitular = pasajero, Canal = "Test", HoraEstimadaDeLlegada = TimeSpan.Zero, CantidadDePasajeros = 1 };
 			var reservasPorCama = new ReservaCama { Reserva = reserva, Cama = cama };
 			reserva.ReservaCamas = new List<ReservaCama> { reservasPorCama };
 			await _context.Reservas.AddAsync(reserva);

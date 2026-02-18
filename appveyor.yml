@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Visual Studio 2019
+image: Visual Studio 2022
 branches:
   only:
     - master
@@ -45,7 +45,8 @@ build:
   parallel: true
   verbosity: minimal
 after_build:
-  - cmd: dotnet publish --framework net5.0 --self-contained true -r win-x64 Backend\Api --output %appveyor_build_folder%\dist
+  - cmd: dotnet test Backend\Api.UnitTests --no-build --verbosity minimal
+  - cmd: dotnet publish --framework net8.0 --self-contained true -r win-x64 Backend\Api --output %appveyor_build_folder%\dist
 artifacts:
   - path: dist
 deploy:

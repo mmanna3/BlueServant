@@ -39,7 +39,7 @@ namespace Api.Config
             var nlogConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "config", "nlog.config");
             if (File.Exists(nlogConfigPath))
             {
-                LogManager.LoadConfiguration(nlogConfigPath);
+                LogManager.Setup().LoadConfigurationFromFile(nlogConfigPath);
             }
 
             dbContext.Database.Migrate();

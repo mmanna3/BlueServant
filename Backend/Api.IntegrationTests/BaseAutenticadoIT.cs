@@ -62,43 +62,78 @@ namespace Api.IntegrationTests
         {
             using var scope = _server.Services.CreateScope();
             await using var context = scope.ServiceProvider.GetService<AppDbContext>();
-            await context.Database.MigrateAsync();
+            var connectionString = context.Database.GetDbConnection().ConnectionString;
+            var useSqlite = connectionString?.Contains(".db") == true;
+            if (useSqlite)
+            {
+                await context.Database.EnsureCreatedAsync();
+            }
+            else
+            {
+                await context.Database.MigrateAsync();
+            }
 
             await ResetearBaseDeDatosExcluyendoMigraciones();
-
         }
 
         protected async Task ResetearBaseDeDatosExcluyendoMigraciones()
         {
             using var scope = _server.Services.CreateScope();
             await using var context = scope.ServiceProvider.GetService<AppDbContext>();
-            
-            var checkpoint = new Checkpoint
+            var connectionString = context.Database.GetDbConnection().ConnectionString;
+            var useSqlite = connectionString?.Contains(".db") == true;
+
+            if (useSqlite)
             {
-                TablesToIgnore = new[]
+                await ResetearSqlite(context, incluirUsuario: true);
+            }
+            else
+            {
+                var checkpoint = new Checkpoint
                 {
-                    "__EFMigrationsHistory",
-                }
-            };
-            
-            await checkpoint.Reset(context.Database.GetDbConnection().ConnectionString);
+                    TablesToIgnore = new Respawn.Graph.Table[] { "__EFMigrationsHistory" }
+                };
+                await checkpoint.Reset(connectionString);
+            }
         }
 
         private async Task ResetearBaseDeDatosExcluyendoUsuarioYMigraciones()
         {
             using var scope = _server.Services.CreateScope();
             await using var context = scope.ServiceProvider.GetService<AppDbContext>();
+            var connectionString = context.Database.GetDbConnection().ConnectionString;
+            var useSqlite = connectionString?.Contains(".db") == true;
 
-            var checkpoint = new Checkpoint
+            if (useSqlite)
             {
-                TablesToIgnore = new[]
+                await ResetearSqlite(context, incluirUsuario: false);
+            }
+            else
+            {
+                var checkpoint = new Checkpoint
                 {
-                    "__EFMigrationsHistory",
-                    "Usuario"
-                }
-            };
+                    TablesToIgnore = new Respawn.Graph.Table[] { "__EFMigrationsHistory", "Usuario" }
+                };
+                await checkpoint.Reset(connectionString);
+            }
+        }
 
-            await checkpoint.Reset(context.Database.GetDbConnection().ConnectionString);
+        private static async Task ResetearSqlite(AppDbContext context, bool incluirUsuario)
+        {
+            await context.Database.ExecuteSqlRawAsync("PRAGMA foreign_keys = OFF");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM ReservaPasajeroAnexo");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM ReservaCamas");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM ReservaHabitacionesPrivadas");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM Reservas");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM Pasajeros");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM CamasCuchetas");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM Camas");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM Habitaciones");
+            if (incluirUsuario)
+            {
+                await context.Database.ExecuteSqlRawAsync("DELETE FROM Usuarios");
+            }
+            await context.Database.ExecuteSqlRawAsync("PRAGMA foreign_keys = ON");
         }
 
         private async Task<string> ObtieneTokenDeUsuarioAutenticado()

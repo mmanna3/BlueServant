@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +43,7 @@ namespace Api.Persistence.Repositories
 
         public async Task<IEnumerable<Habitacion>> ListarConCamasLibresEntre(DateTime primeraNoche, DateTime ultimaNoche)
         {
-	        var habitacionesCompartidasConCamasLibres = await HabitacionesCompartidasConCamasLibresEntre(primeraNoche, ultimaNoche).ToListAsync();
+	        var habitacionesCompartidasConCamasLibres = await HabitacionesCompartidasConCamasLibresEntre(primeraNoche, ultimaNoche);
 	        var habitacionesPrivadasLibres = await HabitacionesPrivadasLibresEntre(primeraNoche, ultimaNoche).ToListAsync();
 
 			return habitacionesCompartidasConCamasLibres.Concat(habitacionesPrivadasLibres.Cast<Habitacion>());
@@ -82,17 +82,26 @@ namespace Api.Persistence.Repositories
 	        return habitacionesPrivadasLibres;
         }
 
-		private IQueryable<HabitacionCompartida> HabitacionesCompartidasConCamasLibresEntre(DateTime primeraNoche, DateTime ultimaNoche)
+		private async Task<IEnumerable<HabitacionCompartida>> HabitacionesCompartidasConCamasLibresEntre(DateTime primeraNoche, DateTime ultimaNoche)
         {
-	        var idsDeCamasOcupadasAlMenosUnaNocheEnElRango =
-		        _context.ReservaCamas
-			        .Where(rc => rc.Reserva.Estado != ReservaEstadoEnum.Cancelada)
-			        .Where(rc => (rc.Reserva.PrimeraNoche <= primeraNoche && rc.Reserva.UltimaNoche >= primeraNoche)
-			                     || (rc.Reserva.PrimeraNoche <= ultimaNoche && rc.Reserva.UltimaNoche >= primeraNoche))
-				        .Select(c => c.Cama.Id)
-			        .ToList();
+	        var idsDeCamasOcupadasAlMenosUnaNocheEnElRango = await _context.ReservaCamas
+		        .Where(rc => rc.Reserva.Estado != ReservaEstadoEnum.Cancelada)
+		        .Where(rc => (rc.Reserva.PrimeraNoche <= primeraNoche && rc.Reserva.UltimaNoche >= primeraNoche)
+		                     || (rc.Reserva.PrimeraNoche <= ultimaNoche && rc.Reserva.UltimaNoche >= primeraNoche))
+		        .Select(c => c.Cama.Id)
+		        .ToListAsync();
 
-	        var habitacionesConCamasLibres = _context.HabitacionesCompartidas.Where(x => x.EstaHabilitada).Select(x =>
+	        var habitaciones = await _context.HabitacionesCompartidas
+		        .Where(x => x.EstaHabilitada)
+		        .Include(x => x.CamasIndividuales)
+		        .Include(x => x.CamasMatrimoniales)
+		        .Include(x => x.CamasCuchetas)
+		            .ThenInclude(x => x.Abajo)
+		        .Include(x => x.CamasCuchetas)
+		            .ThenInclude(x => x.Arriba)
+		        .ToListAsync();
+
+	        return habitaciones.Select(x =>
 		        new HabitacionCompartida
 		        {
 			        Id = x.Id,
@@ -102,13 +111,11 @@ namespace Api.Persistence.Repositories
 			        CamasCuchetas = x.CamasCuchetas.Select(cc => new CamaCucheta
 			        {
 				        Id = cc.Id,
-				        Abajo = cc.Abajo.EstaHabilitada && idsDeCamasOcupadasAlMenosUnaNocheEnElRango.Contains(cc.Abajo.Id) ? null : cc.Abajo,
-				        Arriba = cc.Arriba.EstaHabilitada && idsDeCamasOcupadasAlMenosUnaNocheEnElRango.Contains(cc.Arriba.Id) ? null : cc.Arriba,
+				        Abajo = cc.Abajo != null && cc.Abajo.EstaHabilitada && !idsDeCamasOcupadasAlMenosUnaNocheEnElRango.Contains(cc.Abajo.Id) ? cc.Abajo : null,
+				        Arriba = cc.Arriba != null && cc.Arriba.EstaHabilitada && !idsDeCamasOcupadasAlMenosUnaNocheEnElRango.Contains(cc.Arriba.Id) ? cc.Arriba : null,
 				        Habitacion = x
 			        }).ToList()
 		        });
-
-	        return habitacionesConCamasLibres;
         }
     }
 }

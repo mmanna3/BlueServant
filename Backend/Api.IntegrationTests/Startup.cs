@@ -22,7 +22,16 @@ namespace Api.IntegrationTests
         {
             services.AddControllersWithViews().AddApplicationPart(typeof(ApiAutenticadoController).Assembly);
 
-            services.AddDbContext<AppDbContext>(options => { options.UseSqlServer(Configuration["ConnectionStrings:Default"]); });
+            var connectionString = Configuration["ConnectionStrings:Default"];
+            var useSqlite = connectionString.Contains(".db") || connectionString.Contains("Data Source=") && !connectionString.Contains("LocalDb");
+            if (useSqlite)
+            {
+                services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+            }
+            else
+            {
+                services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            }
 
             services.ConfigurarAppSettingsComoObjetoTipado(Configuration);
 
@@ -33,7 +42,16 @@ namespace Api.IntegrationTests
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
         {
-            dbContext.Database.Migrate();
+            var connectionString = Configuration["ConnectionStrings:Default"];
+            var useSqlite = connectionString.Contains(".db") || (connectionString.Contains("Data Source=") && !connectionString.Contains("LocalDb"));
+            if (useSqlite)
+            {
+                dbContext.Database.EnsureCreated();
+            }
+            else
+            {
+                dbContext.Database.Migrate();
+            }
             
             app.ConfigurarExceptionMiddleware();
 

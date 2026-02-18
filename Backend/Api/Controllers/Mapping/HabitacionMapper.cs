@@ -1,4 +1,4 @@
-﻿using Api.Core.Entidades;
+using Api.Core.Entidades;
 using System.Collections.Generic;
 using System.Linq;
 using Api.Controllers.DTOs.Habitacion;
@@ -89,23 +89,28 @@ namespace Api.Controllers.Mapping
 					Nombre = dto.Nombre,
 					TieneBanio = dto.TieneBanio,
 					InformacionAdicional = dto.InformacionAdicional,
+					EstaHabilitada = true,
 					CamasIndividuales = dto.CamasIndividuales?.ConvertAll(camaIndividual => new CamaIndividual
 					{
-						Nombre = camaIndividual.Nombre
+						Nombre = camaIndividual.Nombre,
+						EstaHabilitada = true
 					}),
 					CamasMatrimoniales = dto.CamasMatrimoniales?.ConvertAll(camaMatrimonial => new CamaMatrimonial
 					{
-						Nombre = camaMatrimonial.Nombre
+						Nombre = camaMatrimonial.Nombre,
+						EstaHabilitada = true
 					}),
 					CamasCuchetas = dto.CamasCuchetas?.ConvertAll(dtoCamasCucheta => new CamaCucheta
 					{
 						Abajo = new CamaCuchetaDeAbajo
 						{
-							Nombre = dtoCamasCucheta.Nombre
+							Nombre = dtoCamasCucheta.Nombre,
+							EstaHabilitada = true
 						},
 						Arriba = new CamaCuchetaDeArriba
 						{
-							Nombre = dtoCamasCucheta.Nombre
+							Nombre = dtoCamasCucheta.Nombre,
+							EstaHabilitada = true
 						}
 					}),
 				};
@@ -115,23 +120,28 @@ namespace Api.Controllers.Mapping
 					Nombre = dto.Nombre,
 					TieneBanio = dto.TieneBanio,
 					InformacionAdicional = dto.InformacionAdicional,
+					EstaHabilitada = true,
 					CamasIndividuales = dto.CamasIndividuales?.ConvertAll(camaIndividual => new CamaIndividual
 					{
-						Nombre = camaIndividual.Nombre
+						Nombre = camaIndividual.Nombre,
+						EstaHabilitada = true
 					}),
 					CamasMatrimoniales = dto.CamasMatrimoniales?.ConvertAll(camaMatrimonial => new CamaMatrimonial
 					{
-						Nombre = camaMatrimonial.Nombre
+						Nombre = camaMatrimonial.Nombre,
+						EstaHabilitada = true
 					}),
 					CamasCuchetas = dto.CamasCuchetas?.ConvertAll(dtoCamasCucheta => new CamaCucheta
 					{
 						Abajo = new CamaCuchetaDeAbajo
 						{
-							Nombre = dtoCamasCucheta.Nombre
+							Nombre = dtoCamasCucheta.Nombre,
+							EstaHabilitada = true
 						},
 						Arriba = new CamaCuchetaDeArriba
 						{
-							Nombre = dtoCamasCucheta.Nombre
+							Nombre = dtoCamasCucheta.Nombre,
+							EstaHabilitada = true
 						}
 					}),
 				};

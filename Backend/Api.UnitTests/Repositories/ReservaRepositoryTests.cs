@@ -21,12 +21,14 @@ namespace Api.UnitTests.Repositories
             DniOPasaporte = "123456789",
             Email = "mrrobot@fsociety.ong",
             Telefono = "5556453",
+            Pais = "AR",
             Id = 1,
         };
 
         protected override void Inicializar()
         {
             _repository = new ReservaRepository(_context);
+            _pasajeroCounter = 0;
         }
 
         [Ignore("")]
@@ -37,7 +39,7 @@ namespace Api.UnitTests.Repositories
             var cama = new CamaIndividual {Id = 1, Nombre = "Azul", HabitacionId = 1};
             _context.CamasIndividuales.Add(cama);
             
-            var reserva = new Reserva {Id = 1, PasajeroTitular = _pasajero, PrimeraNoche = _desde, UltimaNoche = _hasta};
+            var reserva = new Reserva { Id = 1, PasajeroTitular = _pasajero, PrimeraNoche = _desde, UltimaNoche = _hasta, Estado = ReservaEstadoEnum.CheckinPendiente, Canal = "Test", HoraEstimadaDeLlegada = TimeSpan.Zero, CantidadDePasajeros = 1 };
             _context.Reservas.Add(reserva);
 
             //_context.ReservasDeCamas.Add(new ReservaCama {Cama = cama, Reserva = reserva});
@@ -145,6 +147,8 @@ namespace Api.UnitTests.Repositories
 	        listado.Count().Should().Be(0);
         }
 
+        private int _pasajeroCounter;
+
         private int AgregarReservaDeUnaCamaParaLaFecha(DateTime primeraNoche, DateTime ultimaNoche, ReservaEstadoEnum estado = ReservaEstadoEnum.CheckinPendiente)
         {
             var habitacion = new HabitacionCompartida {Nombre = "Azul"};
@@ -153,7 +157,12 @@ namespace Api.UnitTests.Repositories
             var cama = new CamaIndividual { Nombre = "Azul", Habitacion = habitacion };
             _context.CamasIndividuales.Add(cama);
 
-            var reserva = new Reserva { PasajeroTitular = _pasajero, PrimeraNoche = primeraNoche, UltimaNoche = ultimaNoche, Estado = estado };
+            var dni = _pasajeroCounter == 0 ? _pasajero.DniOPasaporte : _pasajero.DniOPasaporte + "_" + _pasajeroCounter;
+            _pasajeroCounter++;
+            var pasajero = new Pasajero { NombreCompleto = _pasajero.NombreCompleto, DniOPasaporte = dni, Email = _pasajero.Email, Telefono = _pasajero.Telefono, Pais = "AR" };
+            _context.Pasajeros.Add(pasajero);
+
+            var reserva = new Reserva { PasajeroTitular = pasajero, PrimeraNoche = primeraNoche, UltimaNoche = ultimaNoche, Estado = estado, Canal = "Test", HoraEstimadaDeLlegada = TimeSpan.Zero, CantidadDePasajeros = 1 };
             _context.Reservas.Add(reserva);
 
             var reservaCama = new ReservaCama { Cama = cama, Reserva = reserva };
