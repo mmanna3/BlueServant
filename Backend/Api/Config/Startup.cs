@@ -36,7 +36,11 @@ namespace Api.Config
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDbContext dbContext)
         {
-            LogManager.LoadConfiguration($"{Directory.GetCurrentDirectory()}/config/nlog.config");
+            var nlogConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "config", "nlog.config");
+            if (File.Exists(nlogConfigPath))
+            {
+                LogManager.LoadConfiguration(nlogConfigPath);
+            }
 
             dbContext.Database.Migrate();
 

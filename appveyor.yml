@@ -9,7 +9,6 @@ environment:
     secure: ZumRpgIeGcRgW3H7yXK0bQ==
   deploy_password:
     secure: SFAvHfsz398LTl83QbS5gw==
-  # Web Deploy Handler requiere la URL completa con msdeploy.axd y el parámetro site
   deploy_server: https://intelligent-nash.192-64-87-146.plesk.page:8172/msdeploy.axd?site=intelligent-nash.192-64-87-146.plesk.page
   deploy_website: intelligent-nash.192-64-87-146.plesk.page
   db_server:
